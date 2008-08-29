@@ -16,7 +16,7 @@ Usage
 
 class PagesController < ApplicationController
   has_layout 'site', :only => %w(faq feedback)
-  has_layout '', :except => %w(faq feedback)
+  has_layout 'custom', :except => %w(faq feedback)
 end
 
 Copyright (c) 2008 Nando Vieira, released under the MIT license
