@@ -6,9 +6,9 @@ module SimplesIdeias
       base.send :extend, ClassMethods
       
       # setting attribute
-      base.write_inheritable_attribute  :has_layout_options, []
-      base.class_inheritable_reader     :has_layout_options
-      
+      base.class_inheritable_accessor :has_layout_options
+      base.has_layout_options = []
+
       # define plugin before_filter
       base.before_filter :choose_layout
     end
@@ -26,6 +26,9 @@ module SimplesIdeias
     module InstanceMethods
       private
         def choose_layout
+          # set default layout to application
+          self.class.write_inheritable_attribute("layout", "application")
+          
           # set class attribute as local
           has_layout_options = self.class.has_layout_options
           
@@ -36,8 +39,7 @@ module SimplesIdeias
             name, options = config
             
             # just process options if is not nil;
-            # maybe somebody used has_layout method instead of
-            # layout
+            # maybe somebody used has_layout method instead of layout
             unless options.nil?
               # process :except and :only options
               if actions = options[:only]
@@ -74,10 +76,11 @@ module SimplesIdeias
             
             self.class.layout(layout_name) if layout_name
           
-            # if options hasn't been set, continue to the
-            # next rule
+            # if options hasn't been set, continue to the next rule
             break if layout_name && !options.nil?
           end
+          
+          self.class.write_inheritable_attribute("layout", "application") unless self.class.read_inheritable_attribute("layout")
         end
         
         def has_layout_execute_callback(callback)
