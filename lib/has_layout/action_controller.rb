@@ -36,7 +36,7 @@ module SimplesIdeias
       private
         def choose_layout
           layout_name = nil
-          rules = self.class.layout_options
+          rules = self.class.layout_options || []
 
           rules.each do |name, options|
             layout_name = name
