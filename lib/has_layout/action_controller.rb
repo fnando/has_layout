@@ -1,8 +1,34 @@
 module SimplesIdeias
   module Layout
     module ClassMethods
+      # Use +has_layout+ instead of the original +layout+ macro.
+      # This one allows you to have multiple conditions on a single controller.
+      #
+      #   has_layout "website"
+      #   has_layout "website", :only => "faq"
+      #   has_layout "website", :only => %w(faq help)
+      #   has_layout "website", :except => "index"
+      #   has_layout "website", :except => %w(index edit)
+      #   has_layout "website", :if => :public_page?
+      #   has_layout "website", :if => proc { public_page? }
+      #   has_layout "website", :unless => :private_page?
+      #   has_layout "website", :unless => proc { private_page? }
+      #
+      # When providing a +proc+ the scope is the controller, so the above examples can be written as
+      #
+      #   class SampleController < ApplicationController
+      #     private
+      #       def private_page?
+      #         true
+      #       end
+      #
+      #       def public_page?
+      #         false
+      #       end
+      #   end
       def has_layout(name, options = nil)
-        self.has_layout_options << [name, options]
+        self.layout_options ||= []
+        self.layout_options << [name, options]
       end
     end
 
@@ -10,13 +36,16 @@ module SimplesIdeias
       private
         def choose_layout
           layout_name = nil
+          rules = self.class.layout_options
 
-          self.class.has_layout_options.each do |layout_name, options|
-            # The layout has been set without any conditions
-            # so we can skip the layout lookup
+          rules.each do |name, options|
+            layout_name = name
+
+            # There's no options, so we can use this
+            # layout for every single action
             break unless options
 
-            # Set :only and :except options
+            # Process conditions
             if options[:only]
               compares_to = true
               actions = options[:only]
@@ -25,38 +54,54 @@ module SimplesIdeias
               actions = options[:except]
             end
 
-            # Process :only/:except condition
             if actions
               valid_action = [actions].flatten.compact.map(&:to_s).include?(self.action_name) == compares_to
             else
               valid_action = true
             end
 
-            # Set :if and :unless options
             if callback = options[:if]
               compares_to = true
             elsif callback = options[:unless]
               compares_to = false
             end
 
-            # Process :if/:unless condition
             if callback
               valid_condition = execute_layout_callback(callback) == compares_to
             else
               valid_condition = true
             end
 
-            # This action is valid according to the conditions above,
-            # so we can stop the layout lookup
+            # The current action is confirming to the conditions,
+            # so we can use it
             break if valid_action && valid_condition
 
-            # Reset layout name
+            # Damn... there's no rule for this action.
+            # Skip to the next one!
             layout_name = nil
           end
 
-          # A layout name has been found, so we need to
-          # set it on the controller
-          self.class.layout layout_name
+          # There's a rule for this action, so
+          # we can safely return it
+          return layout_name if layout_name
+
+          file_list = self.class.layout_list
+          format = params[:format] || "html"
+          controller_name = self.class.name.underscore.gsub(/_controller$/, "")
+
+          # No layout file for XHR + HTML requests
+          return false if format == "html" && request.xhr?
+
+          # A file +#{controller}.#{format}.erb+
+          file = file_list.find {|f| f =~ /\/layouts\/#{Regexp.escape(controller_name)}(.#{Regexp.escape(format)})?.erb/}
+          return controller_name if file
+
+          # A file +application.#{format}.erb+
+          file = file_list.find {|f| f =~ /\/layouts\/application(.#{Regexp.escape(format)})?.erb/}
+          return "application" if file
+
+          # Render no layout
+          nil
         end
 
         def execute_layout_callback(callback)

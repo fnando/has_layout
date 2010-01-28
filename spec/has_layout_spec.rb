@@ -16,12 +16,22 @@ class SampleController < ActionController::Base
     end
 end
 
+class MyController < ActionController::Base
+  def index
+  end
+end
+
+class FooController < ActionController::Base
+  def index
+  end
+end
+
 describe "Has Layout", :type => :controller do
   controller_name :sample
 
   before do
-    SampleController.prepend_view_path File.dirname(__FILE__) + "/resources/views"
-    SampleController.has_layout_options = []
+    ActionController::Base.prepend_view_path File.dirname(__FILE__) + "/resources/views"
+    ActionController::Base.layout_options = []
   end
 
   context "no options" do
@@ -190,6 +200,42 @@ describe "Has Layout", :type => :controller do
     specify "GET /remove should render the custom layout" do
       get :remove
       response.should render_layout("custom")
+    end
+  end
+
+  context "controller name with format" do
+    controller_name :my
+
+    it "should render 'my'" do
+      get :index
+      response.should render_layout("my")
+    end
+  end
+
+  context "controller name without format" do
+    controller_name :foo
+
+    it "should render 'foo'" do
+      get :index
+      response.should render_layout("foo")
+    end
+  end
+
+  context "XHR requests" do
+    specify "GET /index should not render layout when doing a XHR request" do
+      xhr :get, :index
+      response.layout.should be_nil
+    end
+  end
+
+  context "original method" do
+    before do
+      SampleController.layout "general"
+    end
+
+    it "should use general layout" do
+      get :index
+      response.should render_layout("general")
     end
   end
 end

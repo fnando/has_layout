@@ -21,6 +21,8 @@ Add the method call `has_layout` to your controller.
 	  has_layout 'public', :unless => proc { !current_user.admin? }
 	end
 
+When rendering a HTML format (`params[:format]`) in a XHR request, no layout is rendered. You can override this behavior by setting `render :layout => "layout"` in your action.
+
 Maintainer
 ----------
 

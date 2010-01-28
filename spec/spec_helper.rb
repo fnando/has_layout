@@ -13,7 +13,7 @@ ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":me
 
 Spec::Matchers.define :render_layout do |expected_layout|
   expected_layout = "layouts/#{expected_layout}"
-  normalize_layout_name = proc {|n| n.gsub(/^layouts\//, "") }
+  normalize_layout_name = proc {|n| n.to_s.gsub(/^layouts\//, "") }
 
   match do |response|
     response.layout == expected_layout
