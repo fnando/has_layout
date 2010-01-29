@@ -23,6 +23,18 @@ Add the method call `has_layout` to your controller.
 
 When rendering a HTML format (`params[:format]`) in a XHR request, no layout is rendered. You can override this behavior by setting `render :layout => "layout"` in your action.
 
+Testing
+-------
+
+has_layout also includes a `render_layout` matcher. To use it, add the line below to your `spec_helper.rb` file.
+
+	require "has_layout/spec/matchers"
+
+Then you can have something like
+
+	response.should render_layout("application")
+	response.should_not render_layout("custom")
+
 Maintainer
 ----------
 
