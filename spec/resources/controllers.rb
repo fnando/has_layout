@@ -1,6 +1,3 @@
-class ApplicationController < ActionController::Base
-end
-
 class SampleController < ApplicationController
   def index
   end

@@ -3,13 +3,6 @@ require File.dirname(__FILE__) + "/spec_helper"
 describe "Has Layout", :type => :controller do
   controller_name :sample
 
-  before do
-    load File.dirname(__FILE__) + "/resources/controllers.rb"
-    ApplicationController.prepend_view_path File.dirname(__FILE__) + "/resources/views"
-    ApplicationController.layout_options = []
-    ApplicationController.layout :choose_layout
-  end
-
   context "no options" do
     before do
       SampleController.has_layout "general"
@@ -33,10 +26,11 @@ describe "Has Layout", :type => :controller do
 
   context ":only option" do
     before do
+      SampleController.layout_options = []
       SampleController.has_layout "general", :only => "edit"
     end
 
-    specify "GET /index should not render the general layout" do
+    specify "GET /index should not render the general layout :focus" do
       get :index
       response.should_not render_layout("general")
     end
@@ -46,14 +40,14 @@ describe "Has Layout", :type => :controller do
       response.should render_layout("general")
     end
 
-    specify "GET /remove should not render the general layout :focus" do
-      get :remove
+    specify "GET /remove should not render the general layout" do
       response.should_not render_layout("general")
     end
   end
 
   context ":except option" do
     before do
+      SampleController.layout_options = []
       SampleController.has_layout "general", :except => "edit"
     end
 
@@ -75,6 +69,7 @@ describe "Has Layout", :type => :controller do
 
   context ":if option as method" do
     before do
+      SampleController.layout_options = []
       SampleController.has_layout "general", :if => :executing_remove_action
     end
 
@@ -96,6 +91,7 @@ describe "Has Layout", :type => :controller do
 
   context ":if option as proc" do
     before do
+      SampleController.layout_options = []
       SampleController.has_layout "general", :if => proc { executing_remove_action }
     end
 
@@ -117,6 +113,7 @@ describe "Has Layout", :type => :controller do
 
   context ":unless option as method" do
     before do
+      SampleController.layout_options = []
       SampleController.has_layout "general", :unless => :executing_remove_action
     end
 
@@ -138,6 +135,7 @@ describe "Has Layout", :type => :controller do
 
   context ":unless option as proc" do
     before do
+      SampleController.layout_options = []
       SampleController.has_layout "general", :unless => proc { executing_remove_action }
     end
 
@@ -182,6 +180,10 @@ describe "Has Layout", :type => :controller do
   context "controller name with format" do
     controller_name :my
 
+    before do
+      MyController.layout_options = []
+    end
+
     it "should render 'my'" do
       get :index
       response.should render_layout("my")
@@ -190,6 +192,10 @@ describe "Has Layout", :type => :controller do
 
   context "controller name without format" do
     controller_name :foo
+
+    before do
+      FooController.layout_options = []
+    end
 
     it "should render 'foo'" do
       get :index

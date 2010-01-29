@@ -14,6 +14,9 @@ ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":me
 # Load controllers
 require File.dirname(__FILE__) + "/resources/controllers"
 
+# Set views directory
+ApplicationController.prepend_view_path File.dirname(__FILE__) + "/resources/views"
+
 Spec::Matchers.define :render_layout do |expected_layout|
   expected_layout = "layouts/#{expected_layout}"
   normalize_layout_name = proc {|n| n.to_s.gsub(/^layouts\//, "") }

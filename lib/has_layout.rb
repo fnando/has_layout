@@ -1,5 +1,15 @@
 module SimplesIdeias
   module Layout
+    def self.included(base)
+      base.class_eval do
+        extend SimplesIdeias::Layout::ClassMethods
+        include SimplesIdeias::Layout::InstanceMethods
+
+        cattr_accessor :layout_options
+        layout :choose_layout
+      end
+    end
+
     module ClassMethods
       # Use +has_layout+ instead of the original +layout+ macro.
       # This one allows you to have multiple conditions on a single controller.
@@ -37,7 +47,7 @@ module SimplesIdeias
         def choose_layout
           layout_name = nil
           rules = self.class.layout_options || []
-
+require "ruby-debug"; debugger if $BREAKPOINT; true
           rules.each do |name, options|
             layout_name = name
 
