@@ -1,37 +1,13 @@
 require File.dirname(__FILE__) + "/spec_helper"
 
-class SampleController < ActionController::Base
-  def index
-  end
-
-  def edit
-  end
-
-  def remove
-  end
-
-  private
-    def executing_remove_action
-      self.action_name == "remove"
-    end
-end
-
-class MyController < ActionController::Base
-  def index
-  end
-end
-
-class FooController < ActionController::Base
-  def index
-  end
-end
-
 describe "Has Layout", :type => :controller do
   controller_name :sample
 
   before do
-    ActionController::Base.prepend_view_path File.dirname(__FILE__) + "/resources/views"
-    ActionController::Base.layout_options = []
+    load File.dirname(__FILE__) + "/resources/controllers.rb"
+    ApplicationController.prepend_view_path File.dirname(__FILE__) + "/resources/views"
+    ApplicationController.layout_options = []
+    ApplicationController.layout :choose_layout
   end
 
   context "no options" do
@@ -70,7 +46,7 @@ describe "Has Layout", :type => :controller do
       response.should render_layout("general")
     end
 
-    specify "GET /remove should not render the general layout" do
+    specify "GET /remove should not render the general layout :focus" do
       get :remove
       response.should_not render_layout("general")
     end
@@ -197,7 +173,7 @@ describe "Has Layout", :type => :controller do
       response.should render_layout("general")
     end
 
-    specify "GET /remove should render the custom layout" do
+    specify "GET /remove should render the custom layout :focus" do
       get :remove
       response.should render_layout("custom")
     end
@@ -230,7 +206,7 @@ describe "Has Layout", :type => :controller do
 
   context "original method" do
     before do
-      SampleController.layout "general"
+      SampleController.class_eval { layout "general" }
     end
 
     it "should use general layout" do

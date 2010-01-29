@@ -11,6 +11,9 @@ end
 # Establish connection with in memory SQLite 3 database
 ActiveRecord::Base.establish_connection :adapter => "sqlite3", :database => ":memory:"
 
+# Load controllers
+require File.dirname(__FILE__) + "/resources/controllers"
+
 Spec::Matchers.define :render_layout do |expected_layout|
   expected_layout = "layouts/#{expected_layout}"
   normalize_layout_name = proc {|n| n.to_s.gsub(/^layouts\//, "") }
